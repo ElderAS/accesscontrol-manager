@@ -1,0 +1,40 @@
+{
+  "name": "accesscontrol-manager",
+  "version": "0.0.0-development",
+  "description": "Clean and verify your CRUD operations in one place",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "travis-deploy-once": "travis-deploy-once",
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ElderAS/accesscontrol-manager.git"
+  },
+  "keywords": [
+    "accesscontrol",
+    "crud"
+  ],
+  "author": "carsten@elder.no",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ElderAS/accesscontrol-manager/issues"
+  },
+  "homepage": "https://github.com/ElderAS/accesscontrol-manager#readme",
+  "devDependencies": {
+    "husky": "^1.2.0",
+    "jest": "^23.6.0",
+    "semantic-release": "^15.12.1",
+    "travis-deploy-once": "^5.0.9"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test"
+    }
+  },
+  "dependencies": {
+    "notation": "^1.3.6",
+    "accesscontrol": "^2.2.1"
+  }
+}
