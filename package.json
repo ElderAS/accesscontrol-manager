@@ -28,6 +28,9 @@
     "semantic-release": "^15.12.1",
     "travis-deploy-once": "^5.0.9"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "npm test"
