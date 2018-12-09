@@ -60,7 +60,7 @@ function Operation(operation, operationOptions = {}) {
     return data instanceof Array ? Promise.all(data.map(checkPermission)) : checkPermission(data)
 
     async function checkPermission(entry) {
-      if (permissions.current.own.granted && (await options.isOwnerFunc(entry, options.user))) {
+      if (entry && permissions.current.own.granted && (await options.isOwnerFunc(entry, options.user))) {
         return {
           permissionType: 'own',
           isOwner: true,
@@ -116,19 +116,23 @@ function Operation(operation, operationOptions = {}) {
   }
 
   function filterResult(data, options) {
+    let isArray = data instanceof Array
+    if (!isArray && !data.data) return data.data
+
     let transformFunc =
       options.transformFunc ||
       function(val) {
         return val
       }
-    return data instanceof Array
-      ? data.map(
-          entry =>
-            new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
-              isOwner: entry.isOwner,
-            }),
-        )
-      : new Entry(permissions.read[data.permissionType].filter(transformFunc(data.data)), { isOwner: data.isOwner })
+
+    if (data instanceof Array)
+      return data.map(
+        entry =>
+          new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
+            isOwner: entry.isOwner,
+          }),
+      )
+    return new Entry(permissions.read[data.permissionType].filter(transformFunc(data.data)), { isOwner: data.isOwner })
   }
 
   function OptionValidator(operation, options) {

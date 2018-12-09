@@ -105,4 +105,34 @@ describe('Read', () => {
       }),
     })
   })
+
+  test('Read with no results (multi)', async () => {
+    expect(
+      await Manager.read({
+        acl: acl.can('admin'),
+        resource: 'Movie',
+        user: UserMock,
+        query: () => [],
+        isOwnerFunc(doc, user) {
+          if (!user) return false
+          return doc.owner === user.id
+        },
+      }),
+    ).toEqual([])
+  })
+
+  test('Read with no results (single)', async () => {
+    expect(
+      await Manager.read({
+        acl: acl.can('admin'),
+        resource: 'Movie',
+        user: UserMock,
+        query: () => null,
+        isOwnerFunc(doc, user) {
+          if (!user) return false
+          return doc.owner === user.id
+        },
+      }),
+    ).toEqual(null)
+  })
 })
