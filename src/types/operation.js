@@ -7,8 +7,8 @@ function Operation(operation, operationOptions = {}) {
     current: { any: null, own: null },
   }
 
-  return function(options) {
-    Object.assign(options, operationOptions)
+  return function(options = {}) {
+    options = Object.assign({}, operationOptions, options)
     if ((optionValidator = OptionValidator(operation, options))) return Promise.reject(optionValidator)
     let original = null
 
