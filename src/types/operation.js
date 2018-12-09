@@ -2,16 +2,15 @@ const Entry = require('./entry')
 const Notation = require('notation')
 
 function Operation(operation, operationOptions = {}) {
-  let permissions = {
-    read: { any: null, own: null },
-    current: { any: null, own: null },
-  }
-
   return function(options = {}) {
     options = Object.assign({}, operationOptions, options)
     if ((optionValidator = OptionValidator(operation, options))) return Promise.reject(optionValidator)
     let original = null
 
+    let permissions = {
+      read: { any: null, own: null },
+      current: { any: null, own: null },
+    }
     /* Set all permission functions */
     try {
       permissions.read.any = options.acl.readAny(options.resource)
@@ -26,133 +25,133 @@ function Operation(operation, operationOptions = {}) {
     if (!permissions.current.any.granted && !permissions.current.own.granted)
       return Promise.reject(new Error('No access'))
 
-    return performQuery(operation, options)
+    return performQuery({ operation, options })
       .then(data => {
         //Store original data from query
         original = data
         return data
       })
-      .then(data => extractData(data, options))
-      .then(data => findPermission(data, options))
+      .then(data => extractData({ data, options }))
+      .then(data => findPermission({ data, options, permissions }))
       .then(data => {
         if (data instanceof Array) return data.filter(Boolean)
         if (!data) throw new Error('No access')
         return data
       })
-      .then(data => performAction(data, options))
-      .then(data => filterResult(data, options))
-      .then(data => applyData(original, data, options))
+      .then(data => performAction({ data, options, permissions, operation }))
+      .then(data => filterResult({ data, options, permissions }))
+      .then(data => applyData({ original, data, options }))
   }
+}
 
-  function extractData(data, options) {
-    if (!options.documentPath) return data
-    return new Notation(data).get(options.documentPath)
-  }
+function extractData({ data, options }) {
+  if (!options.documentPath) return data
+  return new Notation(data).get(options.documentPath)
+}
 
-  function applyData(original, data, options) {
-    if (!options.documentPath) return data
-    new Notation(original).set(options.documentPath, data)
+function applyData({ original, data, options }) {
+  if (!options.documentPath) return data
+  new Notation(original).set(options.documentPath, data)
 
-    return original
-  }
+  return original
+}
 
-  function findPermission(data, options) {
-    return data instanceof Array ? Promise.all(data.map(checkPermission)) : checkPermission(data)
+function findPermission({ data, options, permissions }) {
+  return data instanceof Array ? Promise.all(data.map(checkPermission)) : checkPermission(data)
 
-    async function checkPermission(entry) {
-      if (entry && permissions.current.own.granted && (await options.isOwnerFunc(entry, options.user))) {
-        return {
-          permissionType: 'own',
-          isOwner: true,
-          data: entry,
-        }
+  async function checkPermission(entry) {
+    if (entry && permissions.current.own.granted && (await options.isOwnerFunc(entry, options.user))) {
+      return {
+        permissionType: 'own',
+        isOwner: true,
+        data: entry,
       }
-
-      if (permissions.current.any.granted) {
-        return {
-          permissionType: 'any',
-          isOwner: false,
-          data: entry,
-        }
-      }
-
-      return null
     }
-  }
 
-  function performAction(data, options) {
-    let Action = options[operation + 'Func']
-
-    return data instanceof Array
-      ? Promise.all(
-          data.map(entry =>
-            performActionSingle(entry).then(result => {
-              entry.data = result
-              return entry
-            }),
-          ),
-        )
-      : performActionSingle(data).then(result => {
-          data.data = result
-          return data
-        })
-
-    function performActionSingle(entry) {
-      let result
-      let meta = { isOwner: entry.isOwner }
-      if (operation === 'create') result = Action(permissions.current[entry.permissionType].filter(entry.data), meta)
-      if (operation === 'read') result = entry.data
-      if (operation === 'update')
-        result = Action(entry.data, permissions.current[entry.permissionType].filter(options.data), meta)
-      if (operation === 'delete') result = Action(entry.data, meta)
-
-      return Promise.resolve(result)
-    }
-  }
-
-  function performQuery(operation, options) {
-    if (operation === 'create') return Promise.resolve(options.data)
-    return Promise.resolve(options.query())
-  }
-
-  function filterResult(data, options) {
-    let isArray = data instanceof Array
-    if (!isArray && !data.data) return data.data
-
-    let transformFunc =
-      options.transformFunc ||
-      function(val) {
-        return val
+    if (permissions.current.any.granted) {
+      return {
+        permissionType: 'any',
+        isOwner: false,
+        data: entry,
       }
+    }
 
-    if (data instanceof Array)
-      return data.map(
-        entry =>
-          new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
-            isOwner: entry.isOwner,
+    return null
+  }
+}
+
+function performAction({ data, options, permissions, operation }) {
+  let Action = options[operation + 'Func']
+
+  return data instanceof Array
+    ? Promise.all(
+        data.map(entry =>
+          performActionSingle(entry).then(result => {
+            entry.data = result
+            return entry
           }),
+        ),
       )
-    return new Entry(permissions.read[data.permissionType].filter(transformFunc(data.data)), { isOwner: data.isOwner })
-  }
+    : performActionSingle(data).then(result => {
+        data.data = result
+        return data
+      })
 
-  function OptionValidator(operation, options) {
-    let requiredOptions = {
-      all: ['user', 'acl', 'resource', 'isOwnerFunc'],
-      create: ['data', 'createFunc'],
-      read: ['query'],
-      update: ['query', 'data', 'updateFunc'],
-      delete: ['query', 'deleteFunc'],
+  function performActionSingle(entry) {
+    let result
+    let meta = { isOwner: entry.isOwner }
+    if (operation === 'create') result = Action(permissions.current[entry.permissionType].filter(entry.data), meta)
+    if (operation === 'read') result = entry.data
+    if (operation === 'update')
+      result = Action(entry.data, permissions.current[entry.permissionType].filter(options.data), meta)
+    if (operation === 'delete') result = Action(entry.data, meta)
+
+    return Promise.resolve(result)
+  }
+}
+
+function performQuery({ operation, options }) {
+  if (operation === 'create') return Promise.resolve(options.data)
+  return Promise.resolve(options.query())
+}
+
+function filterResult({ data, options, permissions }) {
+  let isArray = data instanceof Array
+  if (!isArray && !data.data) return data.data
+
+  let transformFunc =
+    options.transformFunc ||
+    function(val) {
+      return val
     }
 
-    let props = [...requiredOptions.all, ...requiredOptions[operation]]
-    if (
-      props.some(op => {
-        return !(op in options)
-      })
+  if (data instanceof Array)
+    return data.map(
+      entry =>
+        new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
+          isOwner: entry.isOwner,
+        }),
     )
-      return new Error('Insufficient options - required: ' + JSON.stringify(props))
-    return
+  return new Entry(permissions.read[data.permissionType].filter(transformFunc(data.data)), { isOwner: data.isOwner })
+}
+
+function OptionValidator(operation, options) {
+  let requiredOptions = {
+    all: ['user', 'acl', 'resource', 'isOwnerFunc'],
+    create: ['data', 'createFunc'],
+    read: ['query'],
+    update: ['query', 'data', 'updateFunc'],
+    delete: ['query', 'deleteFunc'],
   }
+
+  let props = [...requiredOptions.all, ...requiredOptions[operation]]
+  if (
+    props.some(op => {
+      return !(op in options)
+    })
+  )
+    return new Error('Insufficient options - required: ' + JSON.stringify(props))
+  return
 }
 
 module.exports = Operation
