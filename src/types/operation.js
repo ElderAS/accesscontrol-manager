@@ -40,7 +40,7 @@ function Operation(operation, operationOptions = {}) {
         return data
       })
       .then(data => performAction(data, options))
-      .then(data => filterResult(data))
+      .then(data => filterResult(data, options))
       .then(data => applyData(original, data, options))
   }
 
@@ -115,12 +115,20 @@ function Operation(operation, operationOptions = {}) {
     return Promise.resolve(options.query())
   }
 
-  function filterResult(data) {
+  function filterResult(data, options) {
+    let transformFunc =
+      options.transformFunc ||
+      function(val) {
+        return val
+      }
     return data instanceof Array
       ? data.map(
-          entry => new Entry(permissions.read[entry.permissionType].filter(entry.data), { isOwner: entry.isOwner }),
+          entry =>
+            new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
+              isOwner: entry.isOwner,
+            }),
         )
-      : new Entry(permissions.read[data.permissionType].filter(data.data), { isOwner: data.isOwner })
+      : new Entry(permissions.read[data.permissionType].filter(transformFunc(data.data)), { isOwner: data.isOwner })
   }
 
   function OptionValidator(operation, options) {

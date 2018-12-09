@@ -52,7 +52,7 @@ describe('Delete', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(MoviesMock[1])
+    ).toEqual(MoviesMock[1])
   })
 
   test('Admin can delete any', async () => {
@@ -67,6 +67,6 @@ describe('Delete', () => {
           return true
         },
       }),
-    ).toMatchObject(MoviesMock)
+    ).toEqual(MoviesMock)
   })
 })

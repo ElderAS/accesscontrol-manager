@@ -20,7 +20,7 @@ describe('Read', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(
+    ).toEqual(
       Clone(MoviesMock).map(e => {
         delete e.createdAt
         return e
@@ -40,7 +40,7 @@ describe('Read', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(Clone(MoviesMock))
+    ).toEqual(Clone(MoviesMock))
   })
 
   test('Owner can read "createdAt" on own but not on any', async () => {
@@ -55,7 +55,7 @@ describe('Read', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(
+    ).toEqual(
       Clone(MoviesMock).map(e => {
         if (e.owner !== UserMock.id) delete e.createdAt
         return e
@@ -96,7 +96,7 @@ describe('Read', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject({
+    ).toEqual({
       page: 1,
       pages: 5,
       docs: Clone(MoviesMock).map(e => {

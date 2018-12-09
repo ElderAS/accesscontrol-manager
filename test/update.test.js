@@ -14,7 +14,7 @@ describe('Update', () => {
         acl: acl.can('guest'),
         resource: 'Movie',
         user: {},
-        query: () => Clone(Clone(MoviesMock[0])),
+        query: () => Clone(MoviesMock[0]),
         data: Clone(MoviesMock[0]),
         updateFunc: () => Clone(MoviesMock[0]),
         isOwnerFunc(doc, user) {
@@ -65,7 +65,7 @@ describe('Update', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(expectedResult)
+    ).toEqual(expectedResult)
   })
 
   test('Admin update any', async () => {
@@ -89,6 +89,6 @@ describe('Update', () => {
           return true
         },
       }),
-    ).toMatchObject(mocks)
+    ).toEqual(mocks)
   })
 })

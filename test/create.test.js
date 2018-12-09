@@ -39,7 +39,7 @@ describe('Create', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(expected)
+    ).toEqual(expected)
   })
 
   test('Owner can create any but not set "isVerified" and not read "createdAt"', async () => {
@@ -58,7 +58,7 @@ describe('Create', () => {
           return doc.owner === user.id
         },
       }),
-    ).toMatchObject(expected)
+    ).toEqual(expected)
   })
 
   test('Admin can create any', async () => {
@@ -73,6 +73,6 @@ describe('Create', () => {
           return true
         },
       }),
-    ).toMatchObject(Clone(MoviesMock[0]))
+    ).toEqual(Clone(MoviesMock[0]))
   })
 })

@@ -2,7 +2,7 @@ const Entry = require('../src/types/entry')
 const MovieMock = require('./mocks/entries/movie')
 
 test('Entry returns same output as input data', () => {
-  expect(new Entry(MovieMock, { isOwner: false })).toMatchObject(MovieMock)
+  expect(new Entry(MovieMock, { isOwner: false })).toEqual(MovieMock)
 })
 
 test('Entry isOwner is true', () => {
