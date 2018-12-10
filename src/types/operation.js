@@ -76,6 +76,14 @@ function findPermission({ data, options, permissions }) {
       }
     }
 
+    if (!entry) {
+      return {
+        permissionType: null,
+        isOwner: false,
+        data: entry,
+      }
+    }
+
     return null
   }
 }
@@ -97,16 +105,14 @@ function performAction({ data, options, permissions, operation }) {
         return data
       })
 
-  function performActionSingle(entry) {
-    let result
+  async function performActionSingle(entry) {
     let meta = { isOwner: entry.isOwner }
-    if (operation === 'create') result = Action(permissions.current[entry.permissionType].filter(entry.data), meta)
-    if (operation === 'read') result = entry.data
-    if (operation === 'update')
-      result = Action(entry.data, permissions.current[entry.permissionType].filter(options.data), meta)
-    if (operation === 'delete') result = Action(entry.data, meta)
+    let permission = entry.permissionType ? permissions.current[entry.permissionType] : null
 
-    return Promise.resolve(result)
+    if (operation === 'create') return Action(permission && permission.filter(entry.data), meta)
+    if (operation === 'read') return entry.data
+    if (operation === 'update') return Action(entry.data, permission && permission.filter(options.data), meta)
+    if (operation === 'delete') return Action(entry.data, meta)
   }
 }
 
@@ -116,23 +122,17 @@ function performQuery({ operation, options }) {
 }
 
 function filterResult({ data, options, permissions }) {
-  let isArray = data instanceof Array
-  if (!isArray && !data.data) return data.data
+  let transformFunc = options.transformFunc || (val => val)
 
-  let transformFunc =
-    options.transformFunc ||
-    function(val) {
-      return val
-    }
+  if (data instanceof Array) return data.map(filterResultSingle)
+  return filterResultSingle(data)
 
-  if (data instanceof Array)
-    return data.map(
-      entry =>
-        new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
-          isOwner: entry.isOwner,
-        }),
-    )
-  return new Entry(permissions.read[data.permissionType].filter(transformFunc(data.data)), { isOwner: data.isOwner })
+  function filterResultSingle(entry) {
+    if (!entry.data) return null
+    return new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
+      isOwner: entry.isOwner,
+    })
+  }
 }
 
 function OptionValidator(operation, options) {
