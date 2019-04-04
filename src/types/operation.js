@@ -122,14 +122,15 @@ function performQuery({ operation, options }) {
 }
 
 function filterResult({ data, options, permissions }) {
-  let transformFunc = options.transformFunc || (val => val)
+  let preTransformFunc = options.transformFunc || options.preTransformFunc || (val => val)
+  let postTransformFunc = options.postTransformFunc || (val => val)
 
   if (data instanceof Array) return data.map(filterResultSingle)
   return filterResultSingle(data)
 
   function filterResultSingle(entry) {
     if (!entry.data) return null
-    return new Entry(permissions.read[entry.permissionType].filter(transformFunc(entry.data)), {
+    return new Entry(postTransformFunc(permissions.read[entry.permissionType].filter(preTransformFunc(entry.data))), {
       isOwner: entry.isOwner,
     })
   }
