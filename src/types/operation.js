@@ -117,7 +117,7 @@ function performAction({ data, options, permissions, operation }) {
       });
 
   async function performActionSingle(entry) {
-    let meta = { isOwner: entry.isOwner };
+    let meta = { isOwner: entry.isOwner, ...options };
     let permission = entry.permissionType
       ? permissions.current[entry.permissionType]
       : null;
