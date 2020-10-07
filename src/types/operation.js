@@ -2,7 +2,7 @@ const Entry = require("./entry");
 const Notation = require("notation");
 
 function Operation(operation, operationOptions = {}) {
-  return function(options = {}) {
+  return function (options = {}) {
     options = Object.assign({}, operationOptions, options);
     if ((optionValidator = OptionValidator(operation, options)))
       return Promise.reject(optionValidator);
@@ -10,7 +10,7 @@ function Operation(operation, operationOptions = {}) {
 
     let permissions = {
       read: { any: null, own: null },
-      current: { any: null, own: null }
+      current: { any: null, own: null },
     };
     /* Set all permission functions */
     try {
@@ -31,21 +31,21 @@ function Operation(operation, operationOptions = {}) {
       return Promise.reject(new Error(`Access denied (${options.resource})`));
 
     return performQuery({ operation, options })
-      .then(data => {
+      .then((data) => {
         //Store original data from query
         original = data;
         return data;
       })
-      .then(data => extractData({ data, options }))
-      .then(data => findPermission({ data, options, permissions }))
-      .then(data => {
+      .then((data) => extractData({ data, options }))
+      .then((data) => findPermission({ data, options, permissions }))
+      .then((data) => {
         if (data instanceof Array) return data.filter(Boolean);
         if (!data) throw new Error(`Access denied (${options.resource})`);
         return data;
       })
-      .then(data => performAction({ data, options, permissions, operation }))
-      .then(data => filterResult({ data, options, permissions }))
-      .then(data => applyData({ original, data, options }));
+      .then((data) => performAction({ data, options, permissions, operation }))
+      .then((data) => filterResult({ data, options, permissions }))
+      .then((data) => applyData({ original, data, options }));
   };
 }
 
@@ -75,7 +75,7 @@ function findPermission({ data, options, permissions }) {
       return {
         permissionType: "own",
         isOwner: true,
-        data: entry
+        data: entry,
       };
     }
 
@@ -83,7 +83,7 @@ function findPermission({ data, options, permissions }) {
       return {
         permissionType: "any",
         isOwner: false,
-        data: entry
+        data: entry,
       };
     }
 
@@ -91,7 +91,7 @@ function findPermission({ data, options, permissions }) {
       return {
         permissionType: null,
         isOwner: false,
-        data: entry
+        data: entry,
       };
     }
 
@@ -104,14 +104,14 @@ function performAction({ data, options, permissions, operation }) {
 
   return data instanceof Array
     ? Promise.all(
-        data.map(entry =>
-          performActionSingle(entry).then(result => {
+        data.map((entry) =>
+          performActionSingle(entry).then((result) => {
             entry.data = result;
             return entry;
           })
         )
       )
-    : performActionSingle(data).then(result => {
+    : performActionSingle(data).then((result) => {
         data.data = result;
         return data;
       });
@@ -136,14 +136,16 @@ function performAction({ data, options, permissions, operation }) {
 }
 
 function performQuery({ operation, options }) {
+  let preQueryFunc = options.preQueryFunc || ((val) => val);
+
   if (operation === "create") return Promise.resolve(options.data);
-  return Promise.resolve(options.query());
+  return Promise.resolve(preQueryFunc(options.query()));
 }
 
 function filterResult({ data, options, permissions }) {
   let preTransformFunc =
-    options.transformFunc || options.preTransformFunc || (val => val);
-  let postTransformFunc = options.postTransformFunc || (val => val);
+    options.transformFunc || options.preTransformFunc || ((val) => val);
+  let postTransformFunc = options.postTransformFunc || ((val) => val);
 
   if (data instanceof Array) return data.map(filterResultSingle);
   return filterResultSingle(data);
@@ -157,7 +159,7 @@ function filterResult({ data, options, permissions }) {
         )
       ),
       {
-        isOwner: entry.isOwner
+        isOwner: entry.isOwner,
       }
     );
   }
@@ -169,12 +171,12 @@ function OptionValidator(operation, options) {
     create: ["data", "createFunc"],
     read: ["query"],
     update: ["query", "data", "updateFunc"],
-    delete: ["query", "deleteFunc"]
+    delete: ["query", "deleteFunc"],
   };
 
   let props = [...requiredOptions.all, ...requiredOptions[operation]];
   if (
-    props.some(op => {
+    props.some((op) => {
       return !(op in options);
     })
   )
