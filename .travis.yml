@@ -1,12 +1,12 @@
 language: node_js
 
 node_js:
-  - 12
+  - 11
 
 jobs:
   include:
     - stage: release
-      node_js: 12
+      node_js: 11
       deploy:
         provider: script
         skip_cleanup: true
