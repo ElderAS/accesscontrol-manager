@@ -147,16 +147,18 @@ function filterResult({ data, options, permissions }) {
     options.transformFunc || options.preTransformFunc || ((val) => val);
   let postTransformFunc = options.postTransformFunc || ((val) => val);
 
-  if (data instanceof Array) return data.map(filterResultSingle);
-  return filterResultSingle(data);
+  if (data instanceof Array)
+    return data.map((e) => filterResultSingle(e, options));
+  return filterResultSingle(data, options);
 
-  function filterResultSingle(entry) {
+  function filterResultSingle(entry, options) {
     if (!entry.data) return null;
     return new Entry(
       postTransformFunc(
         permissions.read[entry.permissionType].filter(
-          preTransformFunc(entry.data)
-        )
+          preTransformFunc(entry.data, options)
+        ),
+        options
       ),
       {
         isOwner: entry.isOwner,
