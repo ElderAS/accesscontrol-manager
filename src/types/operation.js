@@ -70,7 +70,7 @@ function findPermission({ data, options, permissions }) {
     if (
       entry &&
       permissions.current.own.granted &&
-      (await options.isOwnerFunc(entry, options.user))
+      (await options.isOwnerFunc(entry, options.user, options))
     ) {
       return {
         permissionType: "own",
