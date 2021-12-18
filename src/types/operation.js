@@ -3,7 +3,7 @@ const Notation = require("notation");
 
 function Operation(operation, operationOptions = {}) {
   return function (options = {}) {
-    options = Object.assign({}, operationOptions, options);
+    options = Object.assign({ operation }, operationOptions, options);
     if ((optionValidator = OptionValidator(operation, options)))
       return Promise.reject(optionValidator);
     let original = null;
@@ -30,7 +30,7 @@ function Operation(operation, operationOptions = {}) {
     if (!permissions.current.any.granted && !permissions.current.own.granted)
       return Promise.reject(new Error(`Access denied (${options.resource})`));
 
-    return performQuery({ operation, options })
+    return performQuery({ options })
       .then((data) => {
         //Store original data from query
         original = data;
@@ -43,7 +43,7 @@ function Operation(operation, operationOptions = {}) {
         if (!data) throw new Error(`Access denied (${options.resource})`);
         return data;
       })
-      .then((data) => performAction({ data, options, permissions, operation }))
+      .then((data) => performAction({ data, options, permissions }))
       .then((data) => filterResult({ data, options, permissions }))
       .then((data) => applyData({ original, data, options }));
   };
@@ -99,7 +99,8 @@ function findPermission({ data, options, permissions }) {
   }
 }
 
-function performAction({ data, options, permissions, operation }) {
+function performAction({ data, options, permissions }) {
+  let operation = options.operation;
   let Action = options[operation + "Func"];
 
   return data instanceof Array
@@ -135,10 +136,10 @@ function performAction({ data, options, permissions, operation }) {
   }
 }
 
-function performQuery({ operation, options }) {
+function performQuery({ options }) {
   let preQueryFunc = options.preQueryFunc || ((val) => val);
 
-  if (operation === "create") return Promise.resolve(options.data);
+  if (options.operation === "create") return Promise.resolve(options.data);
   return Promise.resolve(preQueryFunc(options.query()));
 }
 
