@@ -14,7 +14,7 @@ function Operation(operation, operationOptions = {}) {
     return Handlers.query(options)
       .then(data => {
         //Store source data from query
-        source = data
+        if (operation !== 'create') source = data
         return data
       })
       .then(data => Handlers.extract(data, options))

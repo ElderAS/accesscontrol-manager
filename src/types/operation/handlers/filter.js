@@ -2,6 +2,7 @@ const Entry = require('../../entry')
 
 module.exports = function (data, options, permissions, source) {
   const { read } = permissions
+  if (!source) source = data instanceof Array ? data.map(d => d.data) : data.data
 
   let preTransformFunc = options.transformFunc || options.preTransformFunc || (v => v)
   let postTransformFunc = options.postTransformFunc || (v => v)
