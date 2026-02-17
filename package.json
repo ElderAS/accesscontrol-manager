@@ -3,9 +3,6 @@
   "version": "0.0.0-development",
   "description": "Clean and verify your CRUD operations in one place",
   "main": "src/index.js",
-  "scripts": {
-    "semantic-release": "semantic-release"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ElderAS/accesscontrol-manager.git"
@@ -20,21 +17,11 @@
     "url": "https://github.com/ElderAS/accesscontrol-manager/issues"
   },
   "homepage": "https://github.com/ElderAS/accesscontrol-manager#readme",
-  "devDependencies": {
-    "cz-conventional-changelog": "^3.3.0",
-    "semantic-release": "^17.3.0",
-    "semantic-release-cli": "^5.4.0"
-  },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "notation": "^1.3.6",
     "accesscontrol": "^2.2.1"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }
