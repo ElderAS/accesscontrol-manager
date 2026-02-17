@@ -27,12 +27,13 @@ module.exports = function (data, options, permissions) {
 
   if (data instanceof Array)
     return Promise.all(
-      data.map(entry =>
-        run(entry).then(result => {
+      data.map(entry => {
+        if (!entry) return
+        return run(entry).then(result => {
           entry.data = result
           return entry
-        }),
-      ),
+        })
+      }),
     )
 
   return run(data).then(result => {

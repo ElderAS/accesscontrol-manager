@@ -2,14 +2,16 @@ const Entry = require('../../entry')
 
 module.exports = function (data, options, permissions, source) {
   const { read } = permissions
-  if (!source) source = data instanceof Array ? data.map(d => d.data) : data.data
+
+  if (!source) source = data instanceof Array ? data.map(d => d?.data) : data.data
 
   let preTransformFunc = options.transformFunc || options.preTransformFunc || (v => v)
   let postTransformFunc = options.postTransformFunc || (v => v)
 
   function filter(entry, index) {
+    if (!entry?.data) return null
+
     const { permissionType, data, isOwner } = entry
-    if (!data) return null
 
     let pre = preTransformFunc(data, options)
     let filtered = read[permissionType].filter(pre)

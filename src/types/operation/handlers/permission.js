@@ -29,7 +29,7 @@ module.exports = function (data, options, permissions) {
     }
   }
 
-  if (data instanceof Array) return Promise.all(data.map(check)).then(e => e.filter(Boolean))
+  if (data instanceof Array) return Promise.all(data.map(check))
 
   return check(data).then(e => {
     if (!e) throw new Error(`Access denied (${resource})`)
