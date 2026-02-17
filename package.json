@@ -4,7 +4,6 @@
   "description": "Clean and verify your CRUD operations in one place",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest",
     "semantic-release": "semantic-release"
   },
   "repository": {
@@ -22,10 +21,9 @@
   },
   "homepage": "https://github.com/ElderAS/accesscontrol-manager#readme",
   "devDependencies": {
-    "jest": "^23.6.0",
     "cz-conventional-changelog": "^3.3.0",
-    "semantic-release-cli": "^5.4.3",
-    "semantic-release": "^17.4.4"
+    "semantic-release": "^17.3.0",
+    "semantic-release-cli": "^5.4.0"
   },
   "publishConfig": {
     "access": "public"
