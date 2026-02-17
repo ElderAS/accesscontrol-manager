@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/ElderAS/accesscontrol-manager#readme",
   "devDependencies": {
-    "husky": "^1.2.0",
     "jest": "^23.6.0",
     "cz-conventional-changelog": "^3.3.0",
     "semantic-release-cli": "^5.4.3",
@@ -30,11 +29,6 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm test"
-    }
   },
   "dependencies": {
     "notation": "^1.3.6",
